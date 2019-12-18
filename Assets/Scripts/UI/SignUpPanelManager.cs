@@ -54,8 +54,12 @@ public class SignUpPanelManager : PanelManager
 
                 PlayerPrefs.SetString("sid", cookieValue);
             }
+
+            //유저의 점수 표시
+            HTTPResponseInfo info = response.GetDataFromMessage<HTTPResponseInfo>();
+            GameManager.Instance.SetInfo(info.name, info.score);
+            //회원가입창 닫기
             Hide();
-            Debug.Log(response + "asd");
         }, () =>
         {
             SetInputFieldInteractable(true);

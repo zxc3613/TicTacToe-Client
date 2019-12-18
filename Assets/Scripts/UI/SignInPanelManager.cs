@@ -31,6 +31,7 @@ public class SignInPanelManager : PanelManager
         //로그인
         HTTPNetworkManager.Instance.SignIn(usernameInputField.text, passwordInputField.text, (response) =>
         {
+            //세션 ID 저장
             if (response.Headers.ContainsKey("Set-Cookie"))
             {
                 string cookie = response.Headers["Set-Cookie"];
@@ -42,6 +43,10 @@ public class SignInPanelManager : PanelManager
                 PlayerPrefs.SetString("sid", cookieValue);
             }
             Debug.Log(response.Message);
+            //유저의 점수 표시
+            HTTPResponseInfo info = response.GetDataFromMessage<HTTPResponseInfo>();
+            GameManager.Instance.SetInfo(info.name, info.score);
+            //로그인창 닫기
             Hide();
         }, () =>
         { 

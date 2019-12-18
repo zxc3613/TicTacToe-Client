@@ -90,9 +90,11 @@ public class HTTPNetworkManager : MonoBehaviour
                 Dictionary<string, string> headers = www.GetResponseHeaders();
 
                 long code = www.responseCode;
-                string message = www.downloadHandler.text;
+                HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
+                HTTPResponse response = new HTTPResponse(code, message.message, headers);
 
-                HTTPResponse response = new HTTPResponse(code, message, headers);
+                //string message = www.downloadHandler.text;
+                //HTTPResponse response = new HTTPResponse(code, message, headers);
                 success(response);
             }
         }
@@ -135,10 +137,10 @@ public class HTTPNetworkManager : MonoBehaviour
                 Dictionary<string, string> headers = www.GetResponseHeaders();
 
                 long code = www.responseCode;
-                string message = www.downloadHandler.text;
+                //string message = www.downloadHandler.text;
 
                 HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
-                HTTPResponse response = new HTTPResponse(code, message, headers);
+                HTTPResponse response = new HTTPResponse(code, message.message, headers);
                 success(response);
             }
 

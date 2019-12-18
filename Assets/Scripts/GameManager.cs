@@ -50,8 +50,7 @@ public class GameManager : MonoBehaviour
                 //HTTPResponseMessage infoStr = JsonUtility.FromJson<HTTPResponseMessage>(resultStr);
                 //HTTPResponseMessage info = JsonUtility.FromJson<HTTPResponseMessage>(infoStr.message);
                 HTTPResponseInfo info = response.GetDataFromMessage<HTTPResponseInfo>();
-                nameText.text = info.name;
-                scoreText.text = info.score.ToString();
+                SetInfo(info.name, info.score);
             }, () =>
             {
                 nameText.text = "";
@@ -65,11 +64,15 @@ public class GameManager : MonoBehaviour
         HTTPNetworkManager.Instance.AddScore(5, (response) =>
         {
             addScoreButton.interactable = true;
+
+            HTTPResponseInfo info = response.GetDataFromMessage<HTTPResponseInfo>();
+            SetInfo(info.name, info.score);
         }, () =>
         {
             addScoreButton.interactable = true;
         });
     }
+    //로그아웃
     public void Logout()
     {
         logoutButton.interactable = false;
@@ -87,5 +90,11 @@ public class GameManager : MonoBehaviour
     public void ShowSignInPanel()
     {
         signInPanelManager.Show();
+    }
+    //텍스트에 문자열 넣기
+    public void SetInfo(string name, int score)
+    {
+        nameText.text = name;
+        scoreText.text = score.ToString();
     }
 }
