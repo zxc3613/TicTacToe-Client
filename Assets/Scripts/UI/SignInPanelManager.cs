@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,12 +10,24 @@ public class SignInPanelManager : PanelManager
     [SerializeField] InputField usernameInputField;
     [SerializeField] InputField passwordInputField;
 
+    [SerializeField] Button signInButton;
+
+    byte validationFlag = 0;
+
+    public override void Show()
+    {
+        base.Show();
+        signInButton.interactable = false;
+    }
     public void OnClickSignUp()
     {
+        this.Hide();
         signUpPanelManager.Show();
     }
     public void OnClickSignIn()
     {
+        //Validation
+        //if (PanelValidation() == false) return;
         //로그인
         HTTPNetworkManager.Instance.SignIn(usernameInputField.text, passwordInputField.text, (response) =>
         {
@@ -28,11 +41,56 @@ public class SignInPanelManager : PanelManager
 
                 PlayerPrefs.SetString("sid", cookieValue);
             }
+            Debug.Log(response.Message);
+            Hide();
         }, () =>
         { 
             //로그인창 흔들리기.
         });
-
-        Hide();
     }
+    void OnValueChangedFinalCheck()
+    {
+        if (validationFlag == 3)
+        {
+            signInButton.interactable = true;
+        }
+        else
+        {
+            signInButton.interactable = false;
+        }
+    }
+    public void OnValueChangedUsername(InputField inputField)
+    {
+        string pattern = @"^[a-zA-Z0-9]{4,12}$";
+        if (Regex.IsMatch(inputField.text, pattern))
+        {
+            validationFlag = (byte)(validationFlag | 1);
+        }
+        else
+        {
+            validationFlag = (byte)(validationFlag & ~1);       //~ 넣으면 비트 반전
+        }
+        Debug.Log(validationFlag);
+        OnValueChangedFinalCheck();
+    }
+    public void OnValueChangedPassword(InputField inputField)
+    {
+        string pattern = @"^[a-zA-Z0-9]{4,12}$";
+        if (Regex.IsMatch(inputField.text, pattern))
+        {
+            validationFlag = (byte)(validationFlag | 2);
+        }
+        else
+        {
+            validationFlag = (byte)(validationFlag & 13);
+        }
+        Debug.Log(validationFlag);
+        OnValueChangedFinalCheck();
+    }
+    //bool PanelValidation()
+    //{
+    //    if (usernameInputField.text.Length < 4 || usernameInputField.text.Length > 20) return false;
+    //    if (passwordInputField.text.Length < 4 || passwordInputField.text.Length > 20) return false;
+    //    return true;
+    //}
 }

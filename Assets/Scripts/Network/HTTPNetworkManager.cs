@@ -29,12 +29,18 @@ public class HTTPNetworkManager : MonoBehaviour
     {
         //로그인
         HTTPRequestSignIn signInData = new HTTPRequestSignIn(username, password);
-        signInData.username = username;
-        signInData.password = password;
-
         var postData = signInData.GetJSON();
 
         StartCoroutine(SendPostRequest(postData, HTTPNetworkConstant.logInRequestURL, success, fail));
+    }
+
+    public void SignUp(string username, string password, string name, Action<HTTPResponse> success, Action fail)
+    {
+        //회원가입
+        HTTPRequestSignUp signUpData = new HTTPRequestSignUp(username, password, name);
+        var postData = signUpData.GetJSON();
+
+        StartCoroutine(SendPostRequest(postData, HTTPNetworkConstant.signUpRequestURL, success, fail));
     }
 
     public void AddScore(int score, Action<HTTPResponse> success, Action fail)
@@ -53,6 +59,10 @@ public class HTTPNetworkManager : MonoBehaviour
         StartCoroutine(SendGetRequest(HTTPNetworkConstant.infoRequestURL, success, fail));
     }
 
+    public void Logout(Action<HTTPResponse> success, Action fail)
+    {
+        StartCoroutine(SendGetRequest(HTTPNetworkConstant.logoutURL, success, fail));
+    }
     IEnumerator SendGetRequest(string requestURL, Action<HTTPResponse> success, Action fail)
     {
         using (UnityWebRequest www = UnityWebRequest.Get(HTTPNetworkConstant.serverURL + requestURL))
@@ -127,6 +137,7 @@ public class HTTPNetworkManager : MonoBehaviour
                 long code = www.responseCode;
                 string message = www.downloadHandler.text;
 
+                HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
                 HTTPResponse response = new HTTPResponse(code, message, headers);
                 success(response);
             }

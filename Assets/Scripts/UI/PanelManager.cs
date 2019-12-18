@@ -16,7 +16,7 @@ public class PanelManager : MonoBehaviour
             return panelRectTransform;
         }
     }
-    public void Show()
+    public virtual void Show()
     {
         PanelRectTransform.anchoredPosition = Vector2.zero;
     }
