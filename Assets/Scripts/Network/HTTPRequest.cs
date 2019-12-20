@@ -40,3 +40,11 @@ public class HTTPRequestAddScore : HTTPRequest
         this.score = score;
     }
 }
+public class HTTPRequestAddMessage : HTTPRequest
+{
+    public string message;
+    public HTTPRequestAddMessage(string message)
+    {
+        this.message = message;
+    }
+}

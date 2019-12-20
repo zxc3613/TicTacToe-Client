@@ -39,3 +39,15 @@ public class HTTPResponseInfo
     public string name;
     public int score;
 }
+public class HTTPResponseChat
+{
+    [System.Serializable]
+    public struct Chat
+    {
+        public string _id;
+        public string message;
+        public string name;
+        public string data;
+    }
+    public Chat[] objects;
+}

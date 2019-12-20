@@ -43,6 +43,13 @@ public class HTTPNetworkManager : MonoBehaviour
         StartCoroutine(SendPostRequest(postData, HTTPNetworkConstant.signUpRequestURL, success, fail));
     }
 
+    public void AddMessage(String message, Action<HTTPResponse> success, Action fail)
+    {
+        HTTPRequestAddMessage addMessageData = new HTTPRequestAddMessage(message);
+        var postData = addMessageData.GetJSON();
+
+        StartCoroutine(SendPostRequest(postData, HTTPNetworkConstant.addMessageRequestURL, success, fail));
+    }
     public void AddScore(int score, Action<HTTPResponse> success, Action fail)
     {
         //스코어 저장
@@ -53,7 +60,13 @@ public class HTTPNetworkManager : MonoBehaviour
 
         StartCoroutine(SendPostRequest(postData, HTTPNetworkConstant.addScoreRequestURL, success, fail));
     }
-
+  
+    public void LoadChat(Action<HTTPResponse> success, Action fail, int lastSeq)
+    {
+        //채팅
+        string requestURL = HTTPNetworkConstant.chatRequestURL + lastSeq.ToString();
+        StartCoroutine(SendGetRequest(requestURL, success, fail));
+    }
     public void Info(Action<HTTPResponse> success, Action fail)
     {
         StartCoroutine(SendGetRequest(HTTPNetworkConstant.infoRequestURL, success, fail));

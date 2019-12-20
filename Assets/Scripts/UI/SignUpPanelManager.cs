@@ -130,7 +130,7 @@ public class SignUpPanelManager : PanelManager
     }
     public void OnValueChangedName(InputField inputField)
     {
-        string pattern = @"^[a-zA-Z0-9]{4,12}$";
+        string pattern = @"^[a-zA-Z가-힣_]{2,12}$";
         if (Regex.IsMatch(inputField.text, pattern))
         {
             validationFlag = (byte)(validationFlag | 1 << 3);
