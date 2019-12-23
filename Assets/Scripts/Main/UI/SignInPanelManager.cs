@@ -11,6 +11,7 @@ public class SignInPanelManager : PanelManager
     [SerializeField] InputField passwordInputField;
 
     [SerializeField] Button signInButton;
+    [SerializeField] Button signUpButton;
 
     byte validationFlag = 0;
 
@@ -26,6 +27,8 @@ public class SignInPanelManager : PanelManager
     }
     public void OnClickSignIn()
     {
+        signInButton.interactable = false;
+        signUpButton.interactable = false;
         //Validation
         //if (PanelValidation() == false) return;
         //로그인
@@ -45,12 +48,13 @@ public class SignInPanelManager : PanelManager
             Debug.Log(response.Message);
             //유저의 점수 표시
             HTTPResponseInfo info = response.GetDataFromMessage<HTTPResponseInfo>();
-            GameManager.Instance.SetInfo(info.name, info.score);
+            MainManager.Instance.SetInfo(info.name, info.score);
             //로그인창 닫기
             Hide();
         }, () =>
-        { 
-            //로그인창 흔들리기.
+        {
+            signInButton.interactable = true;
+            signUpButton.interactable = true;
         });
     }
     void OnValueChangedFinalCheck()

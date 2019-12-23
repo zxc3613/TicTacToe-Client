@@ -54,6 +54,7 @@ public class ChatPanelManager : MonoBehaviour
                     }
                     lastSeq = int.Parse(message._id);
                 }
+                scrollRect.verticalNormalizedPosition = 0;
             }, () =>
             {
 

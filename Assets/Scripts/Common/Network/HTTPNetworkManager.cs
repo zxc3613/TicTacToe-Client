@@ -81,33 +81,24 @@ public class HTTPNetworkManager : MonoBehaviour
         using (UnityWebRequest www = UnityWebRequest.Get(HTTPNetworkConstant.serverURL + requestURL))
         {
             yield return www.SendWebRequest();
+
+            long code = www.responseCode;
+            HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
+
             if (www.isNetworkError)
             {
-                Debug.Log(www.error);
+                NetworkErrorHandler();
                 fail();
             }
             else if (www.isHttpError)
             {
-                long code = www.responseCode;
-                switch (code)
-                {
-                    case 401:
-                        PlayerPrefs.SetString("sid", "");
-                        GameManager.Instance.ShowSignInPanel();
-                        break;
-                }
+                HTTPErrorHandler(code, message.message);
                 fail();
             }
             else
             {
                 Dictionary<string, string> headers = www.GetResponseHeaders();
-
-                long code = www.responseCode;
-                HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
                 HTTPResponse response = new HTTPResponse(code, message.message, headers);
-
-                //string message = www.downloadHandler.text;
-                //HTTPResponse response = new HTTPResponse(code, message, headers);
                 success(response);
             }
         }
@@ -120,43 +111,68 @@ public class HTTPNetworkManager : MonoBehaviour
             www.method = "Post";
             www.SetRequestHeader("Content-Type", "application/json");
             string sid = PlayerPrefs.GetString("sid", "");
+
             if (sid != "")
             {
                 www.SetRequestHeader("Set-Cookie", sid);
             }
             yield return www.SendWebRequest();
 
+            long code = www.responseCode;
+            HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
 
             if (www.isNetworkError)
             {
-                Debug.Log(www.error);
+                NetworkErrorHandler();
                 fail();
             }
             else if (www.isHttpError)
             {
-                long code = www.responseCode;
-                switch (code)
-                {
-                    case 401:
-                        PlayerPrefs.SetString("sid", "");
-                        GameManager.Instance.ShowSignInPanel();
-                        break;
-                }
+                HTTPErrorHandler(code, message.message);
                 fail();
             }
             else
             {
                 //서버 > 클라이언트로 응답(Response) 메세지 도착
                 Dictionary<string, string> headers = www.GetResponseHeaders();
-
-                long code = www.responseCode;
-                //string message = www.downloadHandler.text;
-
-                HTTPResponseMessage message = JsonUtility.FromJson<HTTPResponseMessage>(www.downloadHandler.text);
                 HTTPResponse response = new HTTPResponse(code, message.message, headers);
                 success(response);
             }
 
+        }
+    }
+
+    void NetworkErrorHandler()
+    {
+        MainManager.Instance.ShowMessagePanel("서버에 접속할 수 없습니다.", () =>
+        {
+            Debug.Log("Application Quit");
+        });
+    }
+    void HTTPErrorHandler(long code, string message)
+    {
+        switch (code)
+        {
+            case 400:
+                MainManager.Instance.ShowMessagePanel(message);
+                break;
+
+            case 401:
+                MainManager.Instance.ShowMessagePanel(message, () =>
+                {
+                    PlayerPrefs.SetString("sid", "");
+                    MainManager.Instance.ShowSignInPanel();
+                });
+
+                break;
+
+            case 404:
+                MainManager.Instance.ShowMessagePanel(message);
+                break;
+
+            case 503:
+                MainManager.Instance.ShowMessagePanel(message);
+                break;
         }
     }
 }
