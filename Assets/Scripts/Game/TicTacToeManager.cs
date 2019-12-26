@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using SocketIO;
 
 public class TicTacToeManager : MonoBehaviour
 {
@@ -40,12 +42,17 @@ public class TicTacToeManager : MonoBehaviour
     private enum Winner { None, Player, Opponent, Tie }
     //Grid의 행과 열의 수
     private const int rowColNum = 3;
+    //SocketIO
+    private SocketIOComponent socket;
 
     private void Start()
     { 
         //임시 코드
         playerMarkerType = MarkerType.Circle;
         CurrentState = GameState.playerTurn;
+
+        //소켓 초기화
+        InitSocket();
     }
     private void Update()
     {
@@ -85,6 +92,13 @@ public class TicTacToeManager : MonoBehaviour
             }
         }
     }
+
+    private void InitSocket()
+    {
+        GameObject socketObject = GameObject.Find("SocketIO");
+        socket = socketObject.GetComponent<SocketIOComponent>();
+    }
+
     void SetActveTouchCells(bool actve)
     {
         foreach (Cell cell in cells)
