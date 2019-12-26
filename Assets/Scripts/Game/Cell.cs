@@ -10,7 +10,30 @@ public class Cell : MonoBehaviour
     [SerializeField] Sprite circleMarkerSprite;
     [SerializeField] Sprite crossMarkerSprite;
 
-    public int index;
+    BoxCollider2D cachedBoxCollider2D;
+    public BoxCollider2D CachedBoxCollider2D
+    {
+        get
+        {
+            if (!cachedBoxCollider2D)
+            {
+                cachedBoxCollider2D = GetComponent<BoxCollider2D>();
+            }
+            return cachedBoxCollider2D;
+        }
+    }
+    private SpriteRenderer cachedSpriteRenderer;
+    public SpriteRenderer CachedSpriteRenderer
+    {
+        get
+        {
+            if (!cachedSpriteRenderer)
+            {
+                cachedSpriteRenderer = GetComponent<SpriteRenderer>();
+            }
+            return cachedSpriteRenderer;
+        }
+    }
 
     MarkerType markerType;
     public MarkerType MarkerType
@@ -18,6 +41,8 @@ public class Cell : MonoBehaviour
         get { return markerType; }
         set 
         {
+            if (markerType != MarkerType.None) return;
+
             switch (value)
             {
                 case MarkerType.None:
@@ -32,5 +57,11 @@ public class Cell : MonoBehaviour
             }
             markerType = value;
         }
+    }
+
+    public void SetActiveTouch(bool active)
+    {
+        CachedBoxCollider2D.enabled = active;
+        CachedSpriteRenderer.color = (active == true) ? new Color(1,1,1,1) : new Color(1, 1, 1, 0.5f);
     }
 }

@@ -4,28 +4,52 @@ using UnityEngine;
 
 public class TicTacToeManager : MonoBehaviour
 {
+    
     //플레이어의 마커타입
     private MarkerType playerMarkerType;
     //현제 게임의 상태
     private enum GameState { None, playerTurn, OpponentTurn, GameOver}
     private GameState currentState;
+    private GameState CurrentState
+    {
+        get
+        {
+            return currentState;
+        }
+        set
+        {
+            switch (value)
+            {
+                case GameState.None:
+                case GameState.OpponentTurn:
+                case GameState.GameOver:
+                    SetActveTouchCells(false);
+                    break;
+                case GameState.playerTurn:
+                    SetActveTouchCells(true);
+                    break;
+                
+            }
+            currentState = value;
+        }
+    }
+    //화면에 있는 셀의 정보
+    public Cell[] cells;
 
-    [SerializeField] Cell[] cells;
-    private enum GameTransform { width, height , wDiagonal, hDiagonal }
-
-    List<Cell> width = new List<Cell>();
-    List<Cell> height = new List<Cell>();
-
+    //승리 판정
+    private enum Winner { None, Player, Opponent, Tie }
+    //Grid의 행과 열의 수
+    private const int rowColNum = 3;
 
     private void Start()
     { 
         //임시 코드
         playerMarkerType = MarkerType.Circle;
-        currentState = GameState.playerTurn;
+        CurrentState = GameState.playerTurn;
     }
     private void Update()
     {
-        if (currentState == GameState.playerTurn || currentState == GameState.OpponentTurn)
+        if (CurrentState == GameState.playerTurn)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -34,22 +58,137 @@ public class TicTacToeManager : MonoBehaviour
                 if (hitInfo && hitInfo.transform.tag == "Cell")
                 {
                     Cell cell = hitInfo.transform.GetComponent<Cell>();
-                    if (currentState == GameState.playerTurn)
-                    {
-                        cell.MarkerType = playerMarkerType;
-                        width.Add(cell);
-                    }
-                    else
-                    {
-                        cell.MarkerType = (playerMarkerType == MarkerType.Circle) ? MarkerType.Cross : MarkerType.Circle;
-                        height.Add(cell);
-                    }
-                    currentState = (currentState == GameState.playerTurn) ? GameState.OpponentTurn : GameState.playerTurn;
-                }
+                    cell.MarkerType = playerMarkerType;
 
+                    Winner winner = Checkwinner();
+
+                    switch (winner)
+                    {
+                        case Winner.None:
+                            //currentState를 상대턴으로 변경
+                            //서버에게 상대가 게임을 진행할 수 있도록 메세지 전달
+                            CurrentState = GameState.OpponentTurn;
+                            break;
+                        case Winner.Player:
+                            //승리 팝업창 표시
+                            //서버에게 player가 승리했음을 알림
+                            CurrentState = GameState.GameOver;
+
+                            break;
+                        case Winner.Tie:
+                            //무승부 팝업창 표시
+                            //서버에게 player가 비겼음을 알림
+                            CurrentState = GameState.GameOver;
+                            break;
+                    }
+                }
             }
         }
-        if (cells[0].MarkerType != MarkerType.None && 
+    }
+    void SetActveTouchCells(bool actve)
+    {
+        foreach (Cell cell in cells)
+        {
+            cell.SetActiveTouch(actve);
+        }
+    }
+    Winner Checkwinner()
+    {
+        //1. 가로체크
+        for (int i = 0; i < rowColNum; i++)
+        {
+            //비교를 위한 첫번째 Cell
+            Cell cell = cells[rowColNum * i];
+            int num = 0;
+
+            //첫번째 Cell이 PlayerMarkerType과 다르면 for Loop 빠져나옴
+            if (cell.MarkerType != playerMarkerType) continue;
+
+            for (int j = 1; j < rowColNum; j++)
+            {
+                int index = i * rowColNum + j;
+                if (cell.MarkerType == cells[index].MarkerType)
+                {
+                    ++num;
+                }
+            }
+
+            if (cell.MarkerType != MarkerType.None && num == rowColNum - 1)
+            {
+                return Winner.Player;
+            }
+        }
+        //2. 세로체크
+        for (int i = 0; i < rowColNum; i++)
+        {
+            Cell cell = cells[i];
+            int num = 0;
+
+            //첫번째 Cell이 PlayerMarkerType과 다르면 for Loop 빠져나옴
+            if (cell.MarkerType != playerMarkerType) continue;
+
+            for (int j = 1; j < rowColNum; j++)
+            {
+                int index = j * rowColNum + i;
+                if (cell.MarkerType == cells[index].MarkerType)
+                {
+                    ++num;
+                }
+            }
+
+            if (cell.MarkerType != MarkerType.None && num == rowColNum -1)
+            {
+                return Winner.Player;
+            }
+        }
+        //3. 왼쪽 대각선체크
+
+        //첫번째 Cell이 PlayerMarkerType과 다르면 for Loop 빠져나옴
+        if (cells[0].MarkerType == playerMarkerType)
+        {
+            Cell cell = cells[0];
+            int num = 0;
+
+            for (int i = 1; i < rowColNum; i++)
+            {
+                int index = i * rowColNum + i;
+                if (cell.MarkerType == cells[index].MarkerType)
+                {
+                    ++num;
+                }
+            }
+
+            if (cell.MarkerType != MarkerType.None && num == rowColNum - 1)
+            {
+                return Winner.Player;
+            }
+        }
+        //4. 오른쪽 대각선체크
+        if (cells[2].MarkerType == playerMarkerType)
+        {
+            Cell cell = cells[2];
+            int num = 0;
+
+            for (int i = 1; i < rowColNum; i++)
+            {
+                int index = i * rowColNum + rowColNum - i -1;
+                if (cell.MarkerType == cells[index].MarkerType)
+                {
+                    ++num;
+                }
+            }
+
+            if (cell.MarkerType != MarkerType.None && num == rowColNum - 1)
+            {
+                return Winner.Player;
+            }
+        }
+        return Winner.None;
+    }
+}
+
+
+/*if (cells[0].MarkerType != MarkerType.None && 
             cells[1].MarkerType != MarkerType.None && 
             cells[2].MarkerType != MarkerType.None && 
             cells[3].MarkerType != MarkerType.None && 
@@ -70,32 +209,6 @@ public class TicTacToeManager : MonoBehaviour
         }
         else
         {
-            //int s = 4;
-            //switch (s)
-            //{
-            //    case 2:
-            //        break;
-            //    case 3:
-            //        break;
-            //    case 4:
-            //        CellR(0);
-            //        CellR(4);
-            //        CellR(8);
-            //        CellR(12);
-
-            //        CellT(0);
-            //        CellT(1);
-            //        CellT(2);
-            //        CellT(3);
-
-            //        CellE(0);
-            //        CellEs(3);
-            //        break;
-            //    case 5:
-            //        break;
-            //    case 6:
-            //        break;
-            //}
             CellR(0);
             CellR(4);
             CellR(8);
@@ -214,7 +327,6 @@ public class TicTacToeManager : MonoBehaviour
             }
         }
     }
-}
-
+    */
 
 
